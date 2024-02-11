@@ -1,0 +1,544 @@
+openapi: 3.0.1
+info:
+  title: API Сервиса Parkat
+  version: 2.0.0
+  contact:
+    name: Морозов Андрей Владимирович
+    email: info@startup-dev.ru
+servers:
+  - url: https://parkat.startup-dev.ru/
+    description: DEV
+tags:
+  - name: Сервис подписки
+    description: Сервис предназначен для управления подпиской
+  - name: Сервис платежей
+    description: Сервис предназначен для оплаты доступа к функционалу API
+  - name: Сервис парковочных мест
+    description: Сервис предназначен для поиска и подписания на изменения парковочных мест
+  - name: Сервис тарифов
+    description: Сервис предназначен для получения тарифов
+  - name: Сервис Авторизации
+    description: Данный сервис предназначен для регистрации и авторизации пользователей
+  - name: Сервис подсказок для адреса
+    description: Сервис предназначен поиска и стандартизации адресов
+  - name: Сервис пользователя
+    description: Данный сервис предназначен для управление пользователем
+  - name: Сервис управления парковками
+    description: Данный сервис предназначен для управление парковками
+paths:
+  /api/v1/admin/group/{parkingGroupId}:
+    put:
+      tags:
+        - Сервис управления парковками
+      operationId: changeParkingGroup
+      parameters:
+        - name: parkingGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingGroupDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingGroupDto'
+    delete:
+      tags:
+        - Сервис управления парковками
+      operationId: deleteParkingGroup
+      parameters:
+        - name: parkingGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  /api/v1/admin/group/{parkingGroupId}/parking/{parkingId}:
+    put:
+      tags:
+        - Сервис управления парковками
+      operationId: changeParkingPlace
+      parameters:
+        - name: parkingGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: parkingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingDto'
+    delete:
+      tags:
+        - Сервис управления парковками
+      operationId: deleteParkingPlace
+      parameters:
+        - name: parkingGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: parkingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  /api/v1/payments:
+    get:
+      tags:
+        - Сервис платежей
+      operationId: getPayments
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      tags:
+        - Сервис платежей
+      operationId: createPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDto'
+  /api/v1/parking/{parkingGroupId}/unsubscribe:
+    post:
+      tags:
+        - Сервис парковочных мест
+      operationId: unsubscribeOnParkingUpdates
+      parameters:
+        - name: parkingGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  /api/v1/parking/{parkingGroupId}/subscribe:
+    post:
+      tags:
+        - Сервис парковочных мест
+      operationId: subscribeOnParkingUpdates
+      parameters:
+        - name: parkingGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  /api/v1/parking/by-coordinates:
+    post:
+      tags:
+        - Сервис парковочных мест
+      operationId: getParkingGroupsByCoordinates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingSearchRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingGroupDto'
+  /api/v1/authentication/update-token:
+    post:
+      tags:
+        - Сервис Авторизации
+      summary: Обновление accessToken по refreshToken
+      operationId: updateAccessToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenUpdateRequestDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenUpdateResponse'
+  /api/v1/authentication/request-for-code:
+    post:
+      tags:
+        - Сервис Авторизации
+      summary: Получение кода доступа по электронной почте
+      operationId: requestEmailCode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailCodeRequestDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailCodeResponse'
+  /api/v1/authentication/auth:
+    post:
+      tags:
+        - Сервис Авторизации
+      summary: Вход по коду доступа
+      operationId: validateEmailCode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequestDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+  /api/v1/admin/group:
+    get:
+      tags:
+        - Сервис управления парковками
+      operationId: findAll
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingGroupDto'
+    post:
+      tags:
+        - Сервис управления парковками
+      operationId: createParkingGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingGroupDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingGroupDto'
+  /api/v1/admin/group/{parkingGroupId}/parking:
+    post:
+      tags:
+        - Сервис управления парковками
+      operationId: createParkingPlace
+      parameters:
+        - name: parkingGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingDto'
+  /api/v1/user:
+    get:
+      tags:
+        - Сервис пользователя
+      operationId: getMySelf
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+  /api/v1/tariffs:
+    get:
+      tags:
+        - Сервис тарифов
+      operationId: getTariffs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TariffDto'
+  /api/v1/suggestions:
+    get:
+      tags:
+        - Сервис подсказок для адреса
+      operationId: getSuggestions
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDto'
+  /api/v1/subscriptions:
+    get:
+      tags:
+        - Сервис подписки
+      operationId: getUserSubscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionDto'
+  /api/v1/subscriptions/has-active:
+    get:
+      tags:
+        - Сервис подписки
+      operationId: hasUserActiveSubscription
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+components:
+  schemas:
+    ParkingDto:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+          format: uuid
+        occupied:
+          type: boolean
+        enabled:
+          type: boolean
+    ParkingGroupDto:
+      type: object
+      properties:
+        name:
+          type: string
+        externalId:
+          type: string
+        id:
+          type: string
+          format: uuid
+        enabled:
+          type: boolean
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        parkingPlaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParkingDto'
+    CreatePaymentRequest:
+      type: object
+      properties:
+        tariffId:
+          type: string
+          format: uuid
+    PaymentDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - NEW
+            - PAID
+            - CANCELLED
+        amount:
+          type: number
+        paymentUrl:
+          type: string
+    ParkingSearchRequest:
+      type: object
+      properties:
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        radius:
+          type: number
+          format: double
+    TokenUpdateRequestDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    TokenUpdateResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Срок жизни accessToken в секундах
+          format: int64
+    EmailCodeRequestDto:
+      type: object
+      properties:
+        email:
+          maxLength: 255
+          type: string
+          description: Электронная почта
+          example: info@domain.com
+    EmailCodeResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+    AuthenticationRequestDto:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: ID запроса на получение кода
+          format: uuid
+        code:
+          type: string
+          description: Код из письма
+          example: '9095'
+    AuthenticationResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Срок жизни accessToken в секундах
+          format: int64
+        refreshToken:
+          type: string
+    UserDto:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+    TariffDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        daysCount:
+          type: integer
+        price:
+          type: number
+    AddressDto:
+      type: object
+      properties:
+        result:
+          type: string
+        geo_lat:
+          type: number
+          format: double
+        geo_lon:
+          type: number
+          format: double
+    SubscriptionDto:
+      type: object
+      properties:
+        createTs:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
