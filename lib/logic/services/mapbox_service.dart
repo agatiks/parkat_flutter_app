@@ -35,12 +35,12 @@ class MapService {
     return LatLng(lat: position.latitude, lng: position.longitude);
   }
 
-  static Future<List<ParkingGroupDto>?> getParkingSpots(LatLng currentPosition) async {
+  static Future<List<ParkingGroupDto>?> getParkingSpots(UserPosition currentPosition) async {
     final response = await parkatApi.getParkingGroupsByCoordinates(parkingSearchRequest: ParkingSearchRequest(
         (builder) {
-          builder.latitude = currentPosition.lat;
-          builder.longitude = currentPosition.lng;
-          builder.radius = 2000;
+          builder.latitude = currentPosition.coords.lat;
+          builder.longitude = currentPosition.coords.lng;
+          builder.radius = 500;
         }
     ));
     debug(response.data.toString());

@@ -34,18 +34,33 @@ class ParkingMapState extends State<ParkingMap> {
         stream: Geolocator.getPositionStream(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final pos = UserPosition(LatLng(
-                lat: snapshot.data!.latitude, lng: snapshot.data!.longitude), snapshot.data!.heading);
-            return MapWidget(
-              key: const ValueKey("mapWidget"),
-              onMapCreated: _onMapCreated,
-              resourceOptions:
-                  ResourceOptions(accessToken: MapService.accessToken),
-              cameraOptions:
-                  CameraOptions(center: pos.coords.toPoint().toJson(), zoom: 12.0),
-              styleUri: "mapbox://styles/adminparkat/clgqbigrp00i701qqan1k9f3u",
-              onStyleLoadedListener: (_) => _onStyleLoaded(context, pos),
-              onTapListener: (coord) => _onMapTap(coord),
+            final pos = UserPosition(
+                LatLng(
+                    lat: snapshot.data!.latitude,
+                    lng: snapshot.data!.longitude),
+                snapshot.data!.heading);
+            return Scaffold(
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  mapboxMap?.flyTo(
+                      CameraOptions(
+                          center: pos.coords.toPoint().toJson(), zoom: 15.0),
+                      MapAnimationOptions());
+                },
+                child: const Icon(Icons.navigation),
+              ),
+              body: MapWidget(
+                key: const ValueKey("mapWidget"),
+                onMapCreated: _onMapCreated,
+                resourceOptions:
+                    ResourceOptions(accessToken: MapService.accessToken),
+                cameraOptions: CameraOptions(
+                    center: pos.coords.toPoint().toJson(), zoom: 15.0),
+                styleUri:
+                    "mapbox://styles/adminparkat/clgqbigrp00i701qqan1k9f3u",
+                onStyleLoadedListener: (_) => _onStyleLoaded(context, pos),
+                onTapListener: (coord) => _onMapTap(coord),
+              ),
             );
           } else {
             return CircularProgressIndicator();
@@ -66,7 +81,14 @@ class ParkingMapState extends State<ParkingMap> {
       selectionManager =
           SelectedAnnotation(pointManager: pointAnnotationManager);
       await ParkingSpotAnnotation.loadAsset();
-      final parkingGroups = await MapService.getParkingSpots(currentPosition!);
+      final parkingGroups = await MapService.getParkingSpots(pos);
+      mapboxMap?.location.updateSettings(LocationComponentSettings(
+          puckBearingSource: PuckBearingSource.HEADING,
+          locationPuck: LocationPuck(
+              locationPuck2D: LocationPuck2D(
+                  topImage: ParkingSpotAnnotation.current,
+                  bearingImage: ParkingSpotAnnotation.bearing,
+                  shadowImage: null))));
       final annotations = await pointAnnotationManager?.createMulti(
           parkingGroups!
               .map((group) => ParkingSpotAnnotation.getParkingOptions(
@@ -77,8 +99,9 @@ class ParkingMapState extends State<ParkingMap> {
       final annotationToParking = {
         for (var it in Iterable.generate(annotations!.length))
           annotations[it]!.id: parkingGroups![it]
-      };
-      pointAnnotationManager?.create(ParkingSpotAnnotation.getCurrentPositionOptions(pos));
+      }; /*
+      pointAnnotationManager
+          ?.create(ParkingSpotAnnotation.getCurrentPositionOptions(pos));*/
       pointAnnotationManager?.addOnPointAnnotationClickListener(
           ParkingAnnotationClickListener(
               selectionManager!, annotationToParking, context));
@@ -86,7 +109,8 @@ class ParkingMapState extends State<ParkingMap> {
   }
 
   _onMapTap(ScreenCoordinate coord) async {
-    if (selectionManager?.selectedParking==null || selectionManager?.isSelecting()) return;
+    if (selectionManager?.selectedParking == null ||
+        selectionManager?.isSelecting()) return;
     if (kDebugMode) {
       print("Map click");
     }
@@ -94,3 +118,42 @@ class ParkingMapState extends State<ParkingMap> {
     Navigator.pop(context);
   }
 }
+
+/*
+class ParkingMapTest extends StatelessWidget {
+  const ParkingMapTest({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: Geolocator.getPositionStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final pos = snapshot.data!;
+            debug("${pos.latitude} ${pos.longitude}");
+            return MapWidget(
+              onMapCreated: _onMapCreated,
+              resourceOptions:
+              ResourceOptions(accessToken: MapService.accessToken),
+              cameraOptions: CameraOptions(
+                  center: LatLng(lat: pos.latitude,
+                      lng: pos.longitude).toPoint().toJson(),
+                  zoom: 12.0),
+              styleUri:
+              "mapbox://styles/adminparkat/clgqbigrp00i701qqan1k9f3u",
+              */
+/*onStyleLoadedListener: (_) => _onStyleLoaded(context, pos),
+              onTapListener: (coord) => _onMapTap(coord),*/ /*
+
+            );
+          } else { return CircularProgressIndicator();}
+        }
+    );
+  }
+
+  _onMapCreated(MapboxMap mapboxMap) {
+
+  }
+
+}
+*/

@@ -18,12 +18,14 @@ class ParkingSpotAnnotation {
   static Uint8List? image;
   static Uint8List? selectedImage;
   static Uint8List? current;
+  static Uint8List? bearing;
 
   static Future<void> loadAsset() async {
     image = await loadImageFromAssets('assets/parking_spot/icon.png');
     selectedImage =
         await loadImageFromAssets('assets/parking_spot/selected_icon.png');
-    current = await loadImageFromAssets('assets/current_icon.png');
+    current = await loadImageFromAssets('assets/current.png');
+    bearing = await loadImageFromAssets('assets/bearing.png');
   }
 
   static Future<Uint8List> loadImageFromAssets(String path) async =>
